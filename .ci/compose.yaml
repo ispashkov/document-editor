@@ -1,0 +1,45 @@
+name: document-editor
+services:
+  db:
+    image: postgres
+    env_file: ../.env
+    ports:
+      - '5432:5432'
+
+  editor-api:
+    extends:
+      file: compose.base.yaml
+      service: nx-app-base
+    command: pnpm nx run editor-api:serve:development
+    ports:
+      - '3001:3001'
+    depends_on:
+      - db
+    environment:
+      PORT: 3001
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+
+  content-serving-api:
+    extends:
+      file: compose.base.yaml
+      service: nx-app-base
+    command: pnpm nx run content-serving-api:serve:development
+
+    ports:
+      - '3000:3000'
+    depends_on:
+      - editor-api
+    environment:
+      PORT: 3000
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+
+volumes:
+  mono_node_modules: null
